@@ -1,0 +1,13 @@
+---
+# vars file for launch_ec2_instances
+
+key_name: "aws_latest_key"
+instance_type: "t2.micro"
+AMI_ID : "ami-0bcf5425cdc1d8a85"
+security_group: "default"
+subnet_id: "YOUR SUBNET ID"
+region_name: "ap-south-1"
+access_key: "YOUR ACCESS KEY HERE"
+secret_key: "YOUR SECRET KEY HERE"
+number_of_slave_nodes: "2"
+inventory_location: "/root/inventory.txt"

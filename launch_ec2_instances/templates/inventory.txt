@@ -1,0 +1,8 @@
+[master_node]
+{% for i in master_info['instances'] %}
+{{ i.public_ip }}
+{% endfor %}
+[slave_nodes]
+{% for i in slave_info['instances'] %}
+{{ i.public_ip }}
+{% endfor %}

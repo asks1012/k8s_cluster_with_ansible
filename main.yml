@@ -1,0 +1,31 @@
+- hosts: localhost
+  gather_facts: False
+  roles:
+  - launch_ec2_instances
+  tasks:
+  - meta: refresh_inventory
+
+- hosts: master_node:slave_nodes
+  gather_facts: False
+  roles:
+  - configure_docker
+
+- hosts: master_node
+  gather_facts: False
+  roles:
+  - configure_master
+  tasks:
+  - name: "Getting token from master"
+    shell: kubeadm token create --print-join-command
+    register: token
+  - add_host:
+      name: "token_for_worker"
+      link: "{{ token['stdout'] }}"
+
+- hosts: slave_nodes
+  gather_facts: False
+  roles:
+  - configure_worker
+  tasks:
+  - name: "Worker Nodes connecting to the master"
+    shell: "{{ hostvars['token_for_worker']['link'] }}"

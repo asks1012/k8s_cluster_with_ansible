@@ -1,0 +1,59 @@
+---
+# tasks file for launch_ec2_instances
+
+- name: "Installing boto python library"
+  pip:
+    name: boto
+
+- name: "Launching K8s Master"
+  ec2:
+    key_name: "{{ key_name }}"
+    instance_type: "{{ instance_type }}"
+    image: "{{ AMI_ID }}"
+    wait: yes
+    group: "{{ security_group }}"
+    count: 1
+    vpc_subnet_id: "{{ subnet_id }}"
+    assign_public_ip: yes
+    region: "{{ region_name }}"
+    aws_access_key: "{{ access_key }}"
+    aws_secret_key: "{{ secret_key }}"
+    instance_tags:
+      "Name": "Master"
+  register: master_info
+
+- name: "Launching K8s Slave Nodes"
+  ec2:
+    key_name: "{{ key_name }}"
+    instance_type: "{{ instance_type }}"
+    image: "{{ AMI_ID }}"
+    wait: yes
+    group: "{{ security_group }}"
+    count: "{{ number_of_slave_nodes }}" 
+    vpc_subnet_id: "{{ subnet_id }}"
+    assign_public_ip: yes
+    region: "{{ region_name }}"
+    aws_access_key: "{{ access_key }}"
+    aws_secret_key: "{{ secret_key }}"
+    instance_tags:
+      "Name": "Slave"
+  register: slave_info
+
+- name: "Adding Master and Slave Nodes Public IP's to the Inventory"
+  template:
+    src: inventory.txt
+    dest: "{{ inventory_location }}"
+
+- name: "Waiting for Master SSH port 22"
+  wait_for:
+    port: 22
+    host: "{{ item.public_dns_name }}"
+    state: started
+  loop: "{{ master_info['instances'] }}"
+
+- name: "Waiting for Slave SSH port 22"
+  wait_for:
+    port: 22
+    host: "{{ item.public_dns_name }}"
+    state: started
+  loop: "{{ slave_info['instances'] }}"

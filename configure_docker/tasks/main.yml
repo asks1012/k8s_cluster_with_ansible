@@ -1,0 +1,12 @@
+---
+# tasks file for configure_docker
+
+- name: "Installing Docker"
+  package:
+    name: docker
+    state: present
+- name: "Starting and Enabling Docker services"
+  service:
+    name: docker
+    state: started
+    enabled: yes
